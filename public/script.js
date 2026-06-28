@@ -1,64 +1,45 @@
-// Check backend connection when page loads
-fetch("/api/game")
-    .then(response => response.json())
-    .then(data => {
-        console.log("✅ Connected to Backend!");
-        console.log(data);
-    })
-    .catch(error => {
-        console.error("❌ Backend Connection Error:", error);
-    });
-
 console.log("Script Loaded");
 
-// Get HTML elements
-const progress = document.getElementById("progress");
-const loadingText = document.getElementById("loadingText");
+window.onload = function () {
 
-// Start from 0%
-let percent = 0;
+    const progress = document.getElementById("progress");
+    const loadingText = document.getElementById("loadingText");
 
-// Increase every 50 milliseconds
-const timer = setInterval(function () {
+    let percent = 0;
 
-    percent++;
+    const timer = setInterval(() => {
 
-    // Update loading bar
-    progress.style.width = percent + "%";
+        percent++;
 
-    // Update loading text
-    loadingText.textContent = "Loading... " + percent + "%";
+        progress.style.width = percent + "%";
+        loadingText.textContent = "Loading... " + percent + "%";
 
-    // Stop at 100%
-    if (percent >= 100) {
+        if (percent >= 100) {
 
-        clearInterval(timer);
+            clearInterval(timer);
 
-        // Send data to backend
-        fetch("/save-player", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: "Player"
+            fetch("/save-player", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: "Player"
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
+            .then(res => res.json())
+            .then(() => {
 
-            console.log("✅ Backend Response:", data);
+                setTimeout(() => {
+                    window.location.href = "/chapter1.html";
+                }, 800);
 
-            // Go to Chapter 1 after 1 second
-            setTimeout(() => {
-                window.location.href = "chapter1.html";
-            }, 1000);
+            })
+            .catch(err => {
+                console.error("Save error:", err);
+            });
 
-        })
-        .catch(error => {
-            console.error("❌ Error saving player:", error);
-        });
+        }
 
-    }
-
-}, 50);
+    }, 50);
+};

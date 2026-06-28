@@ -3,12 +3,13 @@ const express = require("express");
 const app = express();
 
 // Middleware
+app.use(express.static("Frontend"));
 app.use(express.static("public"));
 app.use(express.json());
 
 // Home Route
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/public/index.html");
+    res.sendFile(__dirname + "/Frontend/index.html");
 });
 
 // Game API

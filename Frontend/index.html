@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Under The Bed</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Monster Under the Bed — main menu with Continue, New Game, and Exit Game options</h2>
+
+  <div class="game-container">
+    <!-- REMOVED the inline style - now using ONLY CSS -->
+    <div class="custom-scene"></div>
+    
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+
+    <div class="blood-drip" style="left:48px; animation-delay:0s;"></div>
+    <div class="blood-drip" style="left:72px; animation-delay:1.4s;"></div>
+    <div class="blood-drip" style="left:38px; animation-delay:2.7s;"></div>
+
+    <div class="menu-panel">
+      <div class="title-group">
+        <div class="title-main">Monster</div>
+        <div class="title-sub">Under The Bed</div>
+      </div>
+
+      <nav class="menu-items" role="navigation" aria-label="Main menu">
+        <button class="menu-item selected" id="btn-continue" onclick="handleMenu('continue')">Continue</button>
+        <button class="menu-item" id="btn-new" onclick="handleMenu('new')">New Game</button>
+        <button class="menu-item" id="btn-exit" onclick="handleMenu('exit')">Exit Game</button>
+      </nav>
+    </div>
+
+    <div class="status-bar">
+      <span class="status-text" id="status-text">Last played: Chapter 2 — The Darkened Hallway</span>
+    </div>
+
+    <div id="dialog-overlay" role="dialog" aria-modal="true">
+      <div class="dialog-box">
+        <div class="dialog-title" id="dlg-title"></div>
+        <div class="dialog-msg" id="dlg-msg"></div>
+        <div class="dialog-btns" id="dlg-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
