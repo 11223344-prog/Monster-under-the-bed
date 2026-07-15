@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monster Under The Bed — Loading</title>
+<link rel="stylesheet" href="style.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;1,400&display=swap');
+body{background:#000;height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Crimson Text',serif}
+.loading-container{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+h1{font-family:'Cinzel',serif;font-size:52px;color:#d50000;letter-spacing:4px;text-shadow:0 0 30px rgba(213,0,0,.4);animation:flicker 3s infinite}
+h2{font-family:'Cinzel',serif;font-size:26px;color:#e8e0d0;letter-spacing:3px}
+#monster{width:200px;opacity:.8;filter:drop-shadow(0 0 20px rgba(180,0,0,.4))}
+#loadingText{font-size:18px;color:#aaa;letter-spacing:.05em;font-style:italic}
+.progress-bar{width:380px;height:18px;background:#1a1a1a;border:1px solid #333;border-radius:9px;overflow:hidden}
+#progress{width:0%;height:100%;background:linear-gradient(to right,#8a0000,#d50000);transition:width .08s}
+.chapter-reveal{font-family:'Cinzel',serif;font-size:14px;color:#8a3028;letter-spacing:.15em;text-transform:uppercase;opacity:0;transition:opacity .8s;margin-top:4px}
+.chapter-reveal.show{opacity:1}
+@keyframes flicker{0%,100%{opacity:1}91%{opacity:1}93%{opacity:.3}95%{opacity:1}98%{opacity:.5}}
+</style>
+</head>
+<body>
+<div class="loading-container">
+  <h1>MONSTER</h1>
+  <h2>UNDER THE BED</h2>
+  <img src="assets/images/monster.png" id="monster" alt="Monster">
+  <p id="loadingText">Loading... 0%</p>
+  <div class="progress-bar"><div id="progress"></div></div>
+  <div class="chapter-reveal" id="chapter-label"></div>
+</div>
+<script src="api.js"></script>
+<script src="sound.js"></script>
+<script>
+Sound.unlock();
+Sound.startDrone();
+const params = new URLSearchParams(location.search);
+const mode   = params.get('mode') || 'new';
+let pct = 0;
+const bar  = document.getElementById('progress');
+const text = document.getElementById('loadingText');
+const label= document.getElementById('chapter-label');
+
+const msgs = ['Entering the house…','The clock strikes 2:17 AM…','Something stirs beneath the bed…','Darkness gathers…'];
+let mi = 0;
+
+const timer = setInterval(async () => {
+  pct++;
+  bar.style.width = pct + '%';
+  if (pct % 25 === 0 && mi < msgs.length) { text.textContent = msgs[mi++]; }
+  else if (pct < 100) { text.textContent = 'Loading... ' + pct + '%'; }
+
+  if (pct >= 100) {
+    clearInterval(timer);
+    text.textContent = 'Loaded.';
+    label.textContent = 'Chapter 1 — The First Night';
+    label.classList.add('show');
+
+    // If continuing, load save first
+    if (mode === 'continue' && API.isLoggedIn()) {
+      const res = await API.load();
+      if (res.data) {
+        localStorage.setItem('mutb_resume', JSON.stringify(res.data));
+        label.textContent = `Chapter ${res.data.chapter} — Resuming…`;
+      }
+    }
+    setTimeout(() => { window.location.href = '/chapter1.html'; }, 900);
+  }
+}, 28);
+</script>
+</body>
+</html>

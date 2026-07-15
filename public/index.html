@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monster Under The Bed</title>
+<link rel="stylesheet" href="style1.css">
+<style>
+/* ── Auth modal ── */
+#auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:50;align-items:center;justify-content:center;flex-direction:column;gap:0}
+#auth-overlay.show{display:flex}
+.auth-box{background:#0d0907;border:1px solid #3a1a10;padding:32px 36px;width:320px;text-align:center}
+.auth-box h2{font-family:'Cinzel',serif;font-size:16px;color:#e8e0d0;letter-spacing:.1em;margin-bottom:22px}
+.auth-tabs{display:flex;gap:0;margin-bottom:22px}
+.auth-tab{flex:1;font-family:'Cinzel',serif;font-size:12px;padding:7px;cursor:pointer;background:transparent;color:#6a5848;border:1px solid #2a1410;letter-spacing:.08em;transition:all .15s}
+.auth-tab.active{background:#6e1f18;color:#f0e8d8;border-color:#c0392b}
+.auth-input{width:100%;background:#050302;border:1px solid #2a1410;color:#e8e0d0;font-family:'Crimson Text',serif;font-size:15px;padding:9px 12px;margin-bottom:10px;outline:none;letter-spacing:.04em}
+.auth-input:focus{border-color:#8a3028}
+.auth-input::placeholder{color:#4a3830}
+.auth-submit{width:100%;background:#6e1f18;border:1px solid #c0392b;color:#f0e8d8;font-family:'Cinzel',serif;font-size:13px;padding:10px;cursor:pointer;letter-spacing:.08em;margin-top:4px;transition:background .15s}
+.auth-submit:hover{background:#8a2520}
+.auth-error{font-family:'Crimson Text',serif;font-size:13px;color:#c0392b;font-style:italic;min-height:18px;margin-top:6px}
+.auth-skip{font-family:'Crimson Text',serif;font-size:12px;color:#4a3830;cursor:pointer;margin-top:14px;text-decoration:underline;font-style:italic}
+.auth-skip:hover{color:#8a7060}
+/* user bar */
+#user-bar{position:absolute;top:8px;right:12px;z-index:15;font-family:'Cinzel',serif;font-size:11px;color:#6a5848;letter-spacing:.05em;display:flex;gap:10px;align-items:center}
+#user-bar span{color:#c8b898}
+#user-bar button{background:transparent;border:none;color:#6a5848;font-family:'Cinzel',serif;font-size:11px;cursor:pointer;padding:0;text-decoration:underline}
+#user-bar button:hover{color:#c0392b}
+</style>
+</head>
+<body>
+<div class="game-container">
+  <div class="custom-scene"></div>
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+  <div class="blood-drip" style="left:48px;animation-delay:0s"></div>
+  <div class="blood-drip" style="left:72px;animation-delay:1.4s"></div>
+  <div class="blood-drip" style="left:38px;animation-delay:2.7s"></div>
+
+  <div id="user-bar">
+    <span id="ub-name"></span> <span id="ub-level" style="font-size:9px;background:#1a0806;border:1px solid #3a1410;color:#d4af37;padding:1px 7px;"></span>
+    <button id="ub-logout" onclick="doLogout()" style="display:none">Logout</button>
+  </div>
+
+  <div class="menu-panel">
+    <div class="title-group">
+      <div class="title-main">Monster</div>
+      <div class="title-sub">Under The Bed</div>
+    </div>
+    <nav class="menu-items">
+      <button class="menu-item selected" id="btn-continue" onclick="handleMenu('continue')">Continue</button>
+      <button class="menu-item" id="btn-new" onclick="handleMenu('new')">New Game</button>
+      <button class="menu-item" onclick="handleMenu('exit')">Exit Game</button>
+      <button class="menu-item" onclick="window.location.href='leaderboard.html'">Leaderboard</button>
+      <button class="menu-item" onclick="window.location.href='profile.html'">My Profile</button>
+    </nav>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-text" id="status-text">Welcome to Monster Under The Bed</span>
+  </div>
+
+  <div id="dialog-overlay" role="dialog" aria-modal="true">
+    <div class="dialog-box">
+      <div class="dialog-title" id="dlg-title"></div>
+      <div class="dialog-msg" id="dlg-msg"></div>
+      <div class="dialog-btns" id="dlg-btns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h2>MONSTER UNDER THE BED</h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">LOGIN</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">REGISTER</button>
+    </div>
+    <input class="auth-input" id="auth-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="auth-input" id="auth-pass" type="password" placeholder="Password">
+    <button class="auth-submit" id="auth-btn" onclick="doAuth()">ENTER</button>
+    <div class="auth-error" id="auth-err"></div>
+    <div class="auth-skip" onclick="skipAuth()">Play without account (no save)</div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="sound.js"></script>
+<script src="style1.css" onerror="void 0"></script>
+<script>
+let authMode = 'login';
+let pendingAction = null;
+let hasSave = false;
+
+async function init() {
+  if (API.isLoggedIn()) {
+    showUserBar();
+    const res = await API.load();
+    if (res.data) {
+      hasSave = true;
+      document.getElementById('btn-continue').classList.add('selected');
+      document.getElementById('btn-new').classList.remove('selected');
+      const d = res.data;
+      document.getElementById('status-text').textContent =
+        `Last save — Chapter ${d.chapter} · ${d.diaryPages||0}/8 diary pages`;
+    } else {
+      document.getElementById('btn-continue').style.opacity = '.4';
+    }
+  } else {
+    document.getElementById('btn-continue').style.opacity = '.4';
+    document.getElementById('status-text').textContent = 'Sign in to save your progress';
+  }
+}
+
+function showUserBar() {
+  const nb = document.getElementById('ub-name');
+  const lb = document.getElementById('ub-logout');
+  const ul = document.getElementById('ub-level');
+  nb.textContent = API.username();
+  lb.style.display = 'inline';
+  const u = API.getUser();
+  if (u && ul) ul.textContent = 'LVL ' + u.level;
+}
+
+function doLogout() {
+  API.logout();
+  location.reload();
+}
+
+function handleMenu(action) {
+  if (action === 'continue') {
+    if (!API.isLoggedIn()) { showAuth('continue'); return; }
+    if (!hasSave) { setStatus('No saved game found. Start a New Game.'); return; }
+    setStatus('Resuming…');
+    window.location.href = '/loading.html?mode=continue';
+  } else if (action === 'new') {
+    showDialog('New Game', 'Start fresh? Any current save will be overwritten.', [
+      { label:'Start', primary:true, action: async () => {
+          closeDialog();
+          if (API.isLoggedIn()) await API.restart();
+          window.location.href = '/loading.html?mode=new';
+      }},
+      { label:'Cancel', action: closeDialog }
+    ]);
+  } else if (action === 'exit') {
+    showDialog('Leave?', 'Your progress is saved. Come back soon.', [
+      { label:'Exit', primary:true, action:()=>{ closeDialog(); setStatus('Goodbye…'); }},
+      { label:'Stay', action: closeDialog }
+    ]);
+  }
+}
+
+/* ── Auth modal ── */
+function showAuth(pending) {
+  pendingAction = pending;
+  document.getElementById('auth-overlay').classList.add('show');
+}
+function switchTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('auth-btn').textContent = mode==='login' ? 'LOGIN' : 'REGISTER';
+  document.getElementById('auth-err').textContent = '';
+}
+async function doAuth() {
+  const u = document.getElementById('auth-user').value.trim();
+  const p = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-err');
+  if (!u || !p) { errEl.textContent = 'Fill in both fields.'; return; }
+  document.getElementById('auth-btn').textContent = '…';
+  const res = authMode === 'login' ? await API.login(u,p) : await API.register(u,p);
+  if (res.error) { errEl.textContent = res.error; document.getElementById('auth-btn').textContent = authMode==='login'?'LOGIN':'REGISTER'; return; }
+  document.getElementById('auth-overlay').classList.remove('show');
+  showUserBar();
+  if (pendingAction === 'continue') handleMenu('continue');
+}
+function skipAuth() {
+  document.getElementById('auth-overlay').classList.remove('show');
+  window.location.href = '/loading.html?mode=new';
+}
+
+/* ── Dialog ── */
+function showDialog(title, msg, btns) {
+  document.getElementById('dlg-title').textContent = title;
+  document.getElementById('dlg-msg').textContent   = msg;
+  const el = document.getElementById('dlg-btns'); el.innerHTML = '';
+  btns.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'dialog-btn' + (b.primary ? ' primary' : '');
+    btn.textContent = b.label;
+    btn.onclick = b.action;
+    el.appendChild(btn);
+  });
+  document.getElementById('dialog-overlay').classList.add('show');
+}
+function closeDialog() { document.getElementById('dialog-overlay').classList.remove('show'); }
+function setStatus(t) { document.getElementById('status-text').textContent = t; }
+
+// ── Menu sounds ──────────────────────────────────────────────────────────
+document.addEventListener('click', () => Sound.unlock(), { once: true });
+document.querySelectorAll('.menu-item, .auth-tab, .auth-submit, .dialog-btn, #ub-logout').forEach(() => {}); // (dialog buttons are created dynamically, handled below)
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.menu-item, .auth-tab, .auth-submit, .dialog-btn, #ub-logout, .auth-skip')) Sound.uiClick();
+});
+document.addEventListener('mouseover', (e) => {
+  if (e.target.closest('.menu-item')) Sound.uiHover();
+});
+Sound.startDrone();
+
+init();
+</script>
+</body>
+</html>

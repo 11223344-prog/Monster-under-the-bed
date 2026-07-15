@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050505;height:100vh;display:flex;justify-content:center;align-items:center;font-family:'Crimson Text',serif}
+.game-over{width:420px;background:#0f0f0f;border:1px solid #222;color:white;text-align:center;overflow:hidden}
+.game-over h1{font-family:'Cinzel',serif;color:#c31919;font-size:36px;margin:20px 0 8px;letter-spacing:2px;text-shadow:0 0 20px rgba(255,0,0,.4)}
+.subtitle{color:#9a7070;font-style:italic;margin-bottom:14px;font-size:15px}
+.game-over img{width:100%;height:280px;object-fit:cover;display:block;border-top:1px solid #222;border-bottom:1px solid #222;filter:brightness(.7) saturate(.8)}
+.stats{color:#d9a9a9;font-size:13px;padding:12px 16px 4px}
+.buttons{display:flex;gap:10px;padding:14px 16px}
+.retry,.menu{flex:1;padding:12px;cursor:pointer;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.06em;border:none;transition:all .15s}
+.retry{background:#8b1d1d;color:white}.retry:hover{background:#a02020}
+.menu{background:#1f1f1f;color:white;border:1px solid #444}.menu:hover{background:#2a2a2a;border-color:#8a3028}
+.tip{border-top:1px solid #222;color:#7a6060;font-size:13px;padding:12px;font-style:italic}

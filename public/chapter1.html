@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 1 — The First Night</title>
+<link rel="stylesheet" href="chapter1.css">
+</head>
+<body>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hud-left">
+    <span id="room-name">Hallway</span>
+  </div>
+  <div class="hud-center">
+    <div class="hud-stat">
+      <span class="hud-label">HEALTH</span>
+      <div class="mini-bar"><div class="mini-fill health-fill" id="health-bar" style="width:100%"></div></div>
+      <span class="hud-val" id="health-val">100</span>
+    </div>
+    <div class="hud-stat">
+      <span class="hud-label">BATTERY</span>
+      <div class="mini-bar"><div class="mini-fill battery-fill" id="battery-bar" style="width:100%"></div></div>
+      <span class="hud-val" id="battery-val">100</span>
+    </div>
+  </div>
+  <div class="hud-right">
+    <span>📄 <span id="pages">0</span>/8</span>
+    <span>⏱ <span id="timer">0</span>s</span>
+    <button class="hud-btn" onclick="togglePause()" title="Pause [P]">⏸</button>
+  </div>
+</div>
+
+<div class="message" id="message"></div>
+
+<!-- STAGE -->
+<div class="stage" id="stage">
+  <div class="room" id="room"></div>
+
+  <!-- Flashlight cone overlay -->
+  <div id="flashlight-cone" class="flashlight-off"></div>
+
+  <!-- Furniture -->
+  <div class="furniture bed"   id="bed"   style="left:49%"  title="The Bed"></div>
+  <div class="furniture desk"  id="desk"  style="left:70%"  title="Desk"></div>
+  <div class="furniture shelf" id="shelf" style="left:25%"  title="Shelf"></div>
+  <div class="furniture closet" id="closet" style="left:13%" title="Closet — [F] to hide"></div>
+
+  <!-- Diary pages (scattered) -->
+  <div class="diary-page" id="dp1" style="left:22%"  title="📄 Diary page"></div>
+  <div class="diary-page" id="dp2" style="left:55%"  title="📄 Diary page" data-zone="bedroom"></div>
+  <div class="diary-page" id="dp3" style="left:75%"  title="📄 Diary page" data-zone="study"></div>
+
+  <!-- Monster -->
+  <img class="actor monster" id="monster" src="assets/images/monster2.png" alt="Monster">
+
+  <!-- Player -->
+  <img class="actor player"  id="player"  src="boy.png" alt="You">
+
+  <!-- Doors -->
+  <div class="door door-left"  id="door-left"  title="← Back"></div>
+  <div class="door door-right" id="door-right" title="→ Forward"></div>
+</div>
+
+<div class="controls-hint">
+  <strong>←→</strong> Move &nbsp;|&nbsp; <strong>F</strong> Flashlight / Hide in closet &nbsp;|&nbsp; <strong>↑ / Space</strong> Interact &nbsp;|&nbsp; <strong>P</strong> Pause
+</div>
+
+<!-- Pause overlay -->
+<div id="pause-overlay" class="pause-overlay hidden">
+  <div class="pause-box">
+    <div class="pause-title">PAUSED</div>
+    <div class="pause-stats" id="pause-stats"></div>
+    <button class="pause-btn primary" onclick="togglePause()">RESUME</button>
+    <button class="pause-btn" onclick="saveAndMenu()">SAVE &amp; MENU</button>
+    <button class="pause-btn" onclick="window.location.href='index.html'">MAIN MENU</button>
+    <div class="pause-tip">💡 Hide in the closet when the monster is close. The flashlight repels it — but drains battery.</div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="sound.js"></script>
+<script src="chapter1.js"></script>
+</body>
+</html>

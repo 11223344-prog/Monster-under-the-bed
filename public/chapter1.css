@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#000;font-family:'Crimson Text',serif;color:#e8e0d0;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;user-select:none;
+}
+
+/* ── HUD ── */
+.hud{
+  width:820px;max-width:98vw;display:flex;align-items:center;justify-content:space-between;
+  padding:6px 14px;background:#0d0907;border:1px solid #2a1410;
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:.05em;color:#c8c0b0;gap:10px;
+}
+.hud-left{font-size:13px;color:#e8c898;min-width:130px}
+.hud-center{display:flex;gap:14px;flex:1;justify-content:center}
+.hud-stat{display:flex;align-items:center;gap:6px}
+.hud-label{font-size:10px;color:#6a5848;letter-spacing:.08em}
+.hud-val{font-size:11px;color:#e8c898;min-width:26px;text-align:right}
+.mini-bar{width:70px;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.mini-fill{height:100%;border-radius:3px;transition:width .4s}
+.health-fill{background:#8a0000}
+.battery-fill{background:#4a6a00}
+.hud-right{display:flex;gap:12px;align-items:center;font-size:12px;min-width:120px;justify-content:flex-end}
+.hud-btn{background:transparent;border:1px solid #3a2010;color:#8a7060;font-size:13px;width:22px;height:22px;cursor:pointer;padding:0;line-height:1;transition:all .1s}
+.hud-btn:hover{border-color:#8a3028;color:#c0392b}
+
+/* ── Message ── */
+.message{
+  width:820px;max-width:98vw;min-height:24px;text-align:center;
+  font-style:italic;color:#c0392b;font-size:14px;padding:4px 8px;
+  letter-spacing:.03em;text-shadow:0 0 8px rgba(192,57,43,.5);
+  font-family:'Crimson Text',serif;transition:opacity .3s;
+}
+
+/* ── Stage ── */
+.stage{
+  position:relative;width:820px;max-width:98vw;height:370px;
+  overflow:hidden;border:1px solid #2a1410;background:#0a0604;
+}
+
+/* Room backgrounds */
+.room{position:absolute;inset:0;transition:background .5s}
+.room.zone-hallway{background:linear-gradient(180deg,#140e0c 0%,#050302 100%)}
+.room.zone-living {background:linear-gradient(180deg,#1a1108 0%,#070402 100%)}
+.room.zone-bedroom{background:linear-gradient(180deg,#1c0a0a 0%,#080202 100%)}
+.room.zone-study  {background:linear-gradient(180deg,#0e1218 0%,#030405 100%)}
+.room.zone-exit   {background:linear-gradient(180deg,#221a0a 0%,#0a0702 100%)}
+.room.alarm{animation:flash-red .35s steps(2) infinite}
+@keyframes flash-red{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5) saturate(2)}}
+
+/* ── Flashlight ── */
+#flashlight-cone{
+  position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6;
+  transition:opacity .2s;
+}
+.flashlight-off{
+  background:rgba(0,0,0,.82);
+}
+.flashlight-on{
+  background:radial-gradient(ellipse 250px 160px at var(--fx,50%) var(--fy,70%),transparent 0%,transparent 35%,rgba(0,0,0,.7) 65%,rgba(0,0,0,.88) 100%);
+}
+
+/* ── Furniture ── */
+.furniture{position:absolute;bottom:16px;border-radius:3px;z-index:2}
+.bed{width:110px;height:56px;background:#3a2a1c;border:2px solid #1c130c;box-shadow:0 0 18px rgba(0,0,0,.6) inset}
+.bed::after{content:'';position:absolute;inset:6px 6px 14px 6px;background:#5a4634;border-radius:2px}
+.bed.shaking{animation:bed-shake .14s linear infinite}
+@keyframes bed-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.desk{width:70px;height:38px;background:#2a1a0c;border:1px solid #1a0c06}
+.shelf{width:80px;height:30px;background:#2a1a0c;border:1px solid #1a0c06;bottom:22px}
+.closet{width:44px;height:90px;background:#1a0e08;border:2px solid #2a1a10;bottom:0;cursor:pointer}
+.closet::before{content:'HIDE';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:7px;color:#4a3830;letter-spacing:.08em;white-space:nowrap}
+.closet.active-hide{background:#0d0804;border-color:#8a3028;box-shadow:0 0 12px rgba(138,48,40,.3) inset}
+
+/* ── Diary pages ── */
+.diary-page{
+  position:absolute;bottom:28px;width:16px;height:20px;z-index:3;cursor:pointer;
+  background:linear-gradient(135deg,#d4af37,#a88020);border:1px solid #8a6010;
+  border-radius:1px;animation:page-glow 1.3s ease-in-out infinite alternate;
+}
+.diary-page::after{content:'📄';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px}
+@keyframes page-glow{from{box-shadow:0 0 4px #d4af37}to{box-shadow:0 0 14px #d4af37,0 0 4px #fff8}}
+
+/* ── Actors ── */
+.actor{position:absolute;bottom:14px;z-index:5;image-rendering:pixelated}
+.player{width:48px;height:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));transition:left .05s linear}
+.monster{width:72px;height:auto;z-index:4;filter:drop-shadow(0 0 14px rgba(180,0,0,.7));display:none;transition:left .05s linear}
+.monster.active{display:block}
+.monster.stunned{filter:drop-shadow(0 0 16px rgba(0,120,255,.8)) brightness(.7)}
+
+/* Alert icon above monster */
+.monster.alerted::before{content:'!';position:absolute;top:-22px;left:50%;transform:translateX(-50%);color:#ff8800;font-family:'Cinzel',serif;font-size:14px;font-weight:700;animation:blink .5s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── Doors ── */
+.door{position:absolute;bottom:0;width:14px;height:130px;background:rgba(100,70,30,.2);border:1px solid rgba(100,70,30,.35);z-index:1}
+.door-left{left:0}.door-right{right:0}
+
+/* ── Controls hint ── */
+.controls-hint{
+  width:820px;max-width:98vw;text-align:center;font-size:12px;
+  color:#4a3830;margin-top:8px;font-style:italic;letter-spacing:.02em;
+}
+.controls-hint strong{color:#6a5848;font-style:normal}
+
+/* ── Pause overlay ── */
+.pause-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;
+  display:flex;align-items:center;justify-content:center;
+}
+.pause-overlay.hidden{display:none}
+.pause-box{
+  background:#0d0907;border:1px solid #3a1a10;padding:32px 40px;
+  text-align:center;width:280px;display:flex;flex-direction:column;gap:10px;
+}
+.pause-title{font-family:'Cinzel',serif;font-size:24px;color:#c0392b;letter-spacing:.15em;margin-bottom:8px}
+.pause-stats{font-family:'Crimson Text',serif;font-size:13px;color:#6a5848;font-style:italic;margin-bottom:6px;line-height:1.6}
+.pause-btn{
+  font-family:'Cinzel',serif;font-size:13px;padding:9px;cursor:pointer;
+  letter-spacing:.08em;border:1px solid #3a1a10;background:transparent;
+  color:#c8c0b0;transition:all .15s;
+}
+.pause-btn:hover{background:#3a1008;color:#f0e8d8;border-color:#8a3028}
+.pause-btn.primary{background:#6e1f18;border-color:#c0392b;color:#f0e8d8}
+.pause-btn.primary:hover{background:#8a2520}
+.pause-tip{font-family:'Crimson Text',serif;font-size:12px;color:#4a3830;font-style:italic;border-top:1px solid #1a1a10;padding-top:10px;margin-top:4px;line-height:1.5}

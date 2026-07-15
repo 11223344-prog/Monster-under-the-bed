@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Were Caught</title>
+<link rel="stylesheet" href="caught.css">
+<style>
+.xp-bar-wrap{background:#1a1210;border:1px solid #2a1410;height:8px;border-radius:4px;overflow:hidden;margin:4px 0 2px}
+.xp-bar-fill{height:100%;background:linear-gradient(to right,#8a0000,#c0392b);border-radius:4px;transition:width .6s}
+.gamif-block{padding:12px 16px;border-top:1px solid #1a1410;display:flex;flex-direction:column;gap:8px}
+.level-row{display:flex;align-items:center;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.06em}
+.level-badge{background:#1a0806;border:1px solid #3a1410;color:#c8a070;padding:2px 10px;font-size:10px}
+.xp-label{color:#6a4030;font-size:10px;font-style:italic}
+.ach-row{display:flex;align-items:center;gap:8px;background:#0d0805;border:1px solid #2a1410;padding:8px 10px}
+.ach-icon{font-size:18px;line-height:1}
+.ach-title{font-family:'Cinzel',serif;font-size:10px;color:#d4af37;letter-spacing:.06em}
+.ach-desc{font-size:11px;color:#6a5040;font-style:italic}
+.no-ach{font-size:12px;color:#3a2820;font-style:italic;text-align:center;padding:4px}
+.leaderboard-link{font-family:'Cinzel',serif;font-size:11px;color:#6a5040;text-decoration:underline;text-align:center;cursor:pointer;margin-top:4px}
+.leaderboard-link:hover{color:#c0392b}
+</style>
+</head>
+<body>
+<div class="game-over">
+  <h1>YOU WERE CAUGHT</h1>
+  <p class="subtitle" id="subtitle">The darkness takes over…</p>
+  <img src="assets/images/monster2.png" alt="Monster">
+  <p class="stats" id="stats"></p>
+
+  <div class="gamif-block" id="gamif-block" style="display:none">
+    <div class="level-row">
+      <span id="level-text"></span>
+      <span class="level-badge" id="level-badge"></span>
+    </div>
+    <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-label" id="xp-label"></div>
+    <div id="ach-list"></div>
+    <div class="leaderboard-link" onclick="window.location.href='leaderboard.html'">📊 View Leaderboard</div>
+  </div>
+
+  <div class="buttons">
+    <button class="retry" onclick="retry()">RETRY</button>
+    <button class="menu"  onclick="window.location.href='index.html'">MAIN MENU</button>
+  </div>
+  <div class="tip" id="tip-box"></div>
+</div>
+<script src="api.js"></script>
+<script src="sound.js"></script>
+<script>
+Sound.unlock();
+document.querySelectorAll('.retry, .menu, .leaderboard-link').forEach(btn => btn.addEventListener('click', () => Sound.uiClick()));
+const TIPS = [
+  '💡 The flashlight repels the monster but drains battery fast.',
+  '💡 Move slowly near the bedroom — proximity triggers the scare.',
+  '💡 Hide in the closet when the monster is hunting.',
+  '💡 Collect diary pages — all 8 unlock the secret ending.',
+  '💡 The monster hunts by sight range. Stay far away.',
+];
+const ACH_DEFS = {
+  first_run:'🎮 First Steps', survivor:'🚪 Survivor', page_hunter:'📄 Page Hunter',
+  lore_master:'📖 Lore Master', speed_runner:'⚡ Speed Runner', ghost:'👻 Ghost',
+  battery_saver:'🔋 Battery Saver', fearless:'🦁 Fearless',
+  monster_food:'💀 Monster Food', veteran:'⚔️ Veteran', high_scorer:'🏆 High Scorer', level_5:'⭐ Rising Dark',
+};
+
+const pages   = localStorage.getItem('mutb_pages')   || 0;
+const time    = localStorage.getItem('mutb_time')    || 0;
+const health  = localStorage.getItem('mutb_health')  || 0;
+const battery = localStorage.getItem('mutb_battery') || 0;
+
+document.getElementById('stats').textContent =
+  `Diary pages: ${pages}/8  ·  Survived: ${time}s  ·  Health: ${health}  ·  Battery: ${battery}`;
+document.getElementById('tip-box').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+// Show gamification block if logged in
+const user    = API.getUser();
+const newAchs = JSON.parse(localStorage.getItem('mutb_new_ach') || '[]');
+localStorage.removeItem('mutb_new_ach');
+
+if (user) {
+  document.getElementById('gamif-block').style.display = 'flex';
+  const pct = Math.round((user.xp / user.xpToNext) * 100);
+  document.getElementById('level-text').textContent  = `${user.username}`;
+  document.getElementById('level-badge').textContent = `LVL ${user.level}`;
+  document.getElementById('xp-fill').style.width     = pct + '%';
+  document.getElementById('xp-label').textContent    = `+50 XP consolation  ·  ${user.xp} / ${user.xpToNext} XP to next level`;
+
+  const achList = document.getElementById('ach-list');
+  if (newAchs.length) {
+    newAchs.forEach(id => {
+      const label = ACH_DEFS[id] || id;
+      const [icon, ...rest] = label.split(' ');
+      achList.innerHTML += `<div class="ach-row"><span class="ach-icon">${icon}</span><div><div class="ach-title">🏆 ACHIEVEMENT UNLOCKED</div><div class="ach-desc">${rest.join(' ')}</div></div></div>`;
+    });
+  } else {
+    achList.innerHTML = '<div class="no-ach">No new achievements this run</div>';
+  }
+}
+
+async function retry() {
+  if (API.isLoggedIn()) await API.restart();
+  window.location.href = 'loading.html?mode=new';
+}
+</script>
+</body>
+</html>

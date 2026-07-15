@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Escaped</title>
+<link rel="stylesheet" href="survive.css">
+<style>
+.gamif-block{padding:12px 16px;border-top:1px solid #1a2a1a;display:flex;flex-direction:column;gap:8px}
+.score-big{font-family:'Cinzel',serif;font-size:28px;color:#2ecc71;text-align:center;letter-spacing:.1em;text-shadow:0 0 18px rgba(46,204,113,.4)}
+.score-label{font-family:'Cinzel',serif;font-size:9px;color:#3a5a3a;letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-top:-4px}
+.xp-bar-wrap{background:#0e1a0e;border:1px solid #1a2a1a;height:8px;border-radius:4px;overflow:hidden;margin:4px 0 2px}
+.xp-bar-fill{height:100%;background:linear-gradient(to right,#1a6a30,#2ecc71);border-radius:4px;transition:width .7s}
+.xp-label{color:#3a5a3a;font-size:10px;font-style:italic;text-align:center}
+.level-row{display:flex;align-items:center;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px}
+.level-badge{background:#0a1a0a;border:1px solid #1a4a1a;color:#2ecc71;padding:2px 10px;font-size:10px;letter-spacing:.08em}
+.level-up{font-family:'Cinzel',serif;font-size:13px;color:#f1c40f;letter-spacing:.1em;text-align:center;text-shadow:0 0 12px rgba(241,196,15,.5);animation:glow 1s ease-in-out infinite alternate}
+@keyframes glow{from{opacity:.7}to{opacity:1}}
+.ach-row{display:flex;align-items:center;gap:8px;background:#0a180a;border:1px solid #1a3a1a;padding:8px 10px}
+.ach-icon{font-size:18px;line-height:1}
+.ach-title{font-family:'Cinzel',serif;font-size:10px;color:#d4af37;letter-spacing:.06em}
+.ach-desc{font-size:11px;color:#3a5a3a;font-style:italic}
+.no-ach{font-size:12px;color:#2a3a2a;font-style:italic;text-align:center;padding:4px}
+.nav-links{display:flex;gap:10px;justify-content:center;margin-top:4px}
+.nav-link{font-family:'Cinzel',serif;font-size:11px;color:#2a5a2a;text-decoration:underline;cursor:pointer}
+.nav-link:hover{color:#2ecc71}
+</style>
+</head>
+<body>
+<div class="game-over win">
+  <h1>YOU ESCAPED</h1>
+  <p class="subtitle">The front door slams behind you. You made it out alive.</p>
+  <img src="assets/images/house.jpg" alt="House">
+  <p class="stats" id="stats"></p>
+
+  <div class="gamif-block" id="gamif-block">
+    <div class="score-big" id="score-big">—</div>
+    <div class="score-label">SCORE</div>
+    <div id="level-up-banner" style="display:none" class="level-up">⭐ LEVEL UP! ⭐</div>
+    <div class="level-row">
+      <span id="level-text"></span>
+      <span class="level-badge" id="level-badge"></span>
+    </div>
+    <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-label" id="xp-label"></div>
+    <div id="ach-list"></div>
+    <div class="nav-links">
+      <span class="nav-link" onclick="window.location.href='leaderboard.html'">📊 Leaderboard</span>
+      <span class="nav-link" onclick="window.location.href='profile.html'">👤 My Profile</span>
+    </div>
+  </div>
+
+  <div class="closing-quote">"As children, we fear what hides beneath the bed.<br>Sometimes the real horror is discovering <em>why</em> it is there."</div>
+  <div class="buttons">
+    <button class="retry" onclick="window.location.href='loading.html?mode=new'">PLAY AGAIN</button>
+    <button class="menu"  onclick="window.location.href='index.html'">MAIN MENU</button>
+  </div>
+  <div class="tip" id="tip-box"></div>
+</div>
+<script src="api.js"></script>
+<script src="sound.js"></script>
+<script>
+Sound.unlock();
+document.querySelectorAll('.retry, .menu, .nav-link').forEach(btn => btn.addEventListener('click', () => Sound.uiClick()));
+const ACH_DEFS = {
+  first_run:'🎮 First Steps', survivor:'🚪 Survivor', page_hunter:'📄 Page Hunter',
+  lore_master:'📖 Lore Master', speed_runner:'⚡ Speed Runner', ghost:'👻 Ghost',
+  battery_saver:'🔋 Battery Saver', fearless:'🦁 Fearless',
+  monster_food:'💀 Monster Food', veteran:'⚔️ Veteran', high_scorer:'🏆 High Scorer', level_5:'⭐ Rising Dark',
+};
+
+const pages   = localStorage.getItem('mutb_pages')   || 0;
+const time    = localStorage.getItem('mutb_time')    || 0;
+const health  = localStorage.getItem('mutb_health')  || 100;
+const battery = localStorage.getItem('mutb_battery') || 100;
+const score   = localStorage.getItem('mutb_score')   || 0;
+const xpEarned= localStorage.getItem('mutb_xp')      || 0;
+const leveled = localStorage.getItem('mutb_leveled') === '1';
+const newAchs = JSON.parse(localStorage.getItem('mutb_new_ach') || '[]');
+['mutb_score','mutb_xp','mutb_leveled','mutb_new_ach'].forEach(k => localStorage.removeItem(k));
+
+document.getElementById('stats').textContent =
+  `Diary pages: ${pages}/8  ·  Time: ${time}s  ·  Health: ${health}  ·  Battery: ${battery}`;
+
+// Ending flavour
+const ending = Number(pages) >= 8 ? '🕯️ SECRET ENDING: All diary pages found. The full story is revealed.'
+             : Number(pages) >= 5 ? '🔍 TRUTH ENDING: The mystery is partially uncovered.'
+             : '🚪 ESCAPE ENDING: You survived, but the truth remains hidden.';
+document.getElementById('tip-box').textContent = ending;
+
+// Score
+document.getElementById('score-big').textContent = Number(score).toLocaleString();
+
+// Gamification details
+const user = API.getUser();
+if (user) {
+  if (leveled) document.getElementById('level-up-banner').style.display = 'block';
+  const pct = Math.round((user.xp / user.xpToNext) * 100);
+  document.getElementById('level-text').textContent  = user.username;
+  document.getElementById('level-badge').textContent = `LVL ${user.level}`;
+  document.getElementById('xp-fill').style.width     = pct + '%';
+  document.getElementById('xp-label').textContent    = `+${xpEarned} XP  ·  ${user.xp} / ${user.xpToNext} to Level ${user.level + 1}`;
+
+  const achList = document.getElementById('ach-list');
+  if (newAchs.length) {
+    newAchs.forEach(id => {
+      const label = ACH_DEFS[id] || id;
+      const [icon, ...rest] = label.split(' ');
+      achList.innerHTML += `<div class="ach-row"><span class="ach-icon">${icon}</span><div><div class="ach-title">🏆 ACHIEVEMENT UNLOCKED</div><div class="ach-desc">${rest.join(' ')}</div></div></div>`;
+    });
+  } else {
+    achList.innerHTML = '<div class="no-ach">No new achievements this run — keep going!</div>';
+  }
+} else {
+  // Guest: show score only, prompt to sign in
+  document.getElementById('level-text').textContent  = 'Guest';
+  document.getElementById('level-badge').textContent = 'No Account';
+  document.getElementById('xp-label').textContent    = 'Sign in to save XP, achievements & leaderboard scores';
+  document.getElementById('ach-list').innerHTML      = '<div class="no-ach">Sign in to unlock achievements</div>';
+}
+</script>
+</body>
+</html>

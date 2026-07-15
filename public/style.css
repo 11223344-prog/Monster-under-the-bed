@@ -1,0 +1,65 @@
+/* Reset */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* Body */
+body{
+    background:#000;
+    color:white;
+    font-family:Arial, Helvetica, sans-serif;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Loading Container */
+.loading-container{
+    text-align:center;
+}
+
+/* Game Title */
+h1{
+    font-size:55px;
+    color:#d50000;
+    letter-spacing:3px;
+}
+
+h2{
+    font-size:30px;
+    color:#ffffff;
+    margin-bottom:25px;
+}
+
+/* Monster Image */
+#monster{
+    width:250px;
+    margin-bottom:20px;
+}
+
+/* Loading Text */
+#loadingText{
+    font-size:20px;
+    margin-bottom:15px;
+}
+
+/* Progress Bar */
+.progress-bar{
+    width:350px;
+    height:20px;
+    background:#444;
+    border-radius:10px;
+    overflow:hidden;
+    margin:auto;
+}
+
+/* Red Progress */
+#progress{
+    width:0%;
+    height:100%;
+    background:red;
+    transition:width 0.1s;
+}
